@@ -8,21 +8,59 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import DraggableCard from "../Card/DraggableCard";
+import FlipCard from "./FlipCard";
+
+import Image from "../../assets/backface.png";
+
+const FLIP_STEP_MS = 500;
+const FLIP_DURATION_MS = 650;
+const REVEAL_STEP_MS = 300;
 
 const UpperCard = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [flipTrigger, setFlipTrigger] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [revealedIndexes, setRevealedIndexes] = useState<number[]>([]);
+
   const baseCards = useGameStore((s) => s.baseCards);
   const lowCards = useGameStore((s) => s.lowCards);
   const startGame = useGameStore((s) => s.startGame);
-  const resultIndex = useGameStore((s) => s.resultIndex);
   const riskCards = useGameStore((s) => s.riskCards);
-  const totalMultiplier = useGameStore((s) => s.reveal());
   const { betCounder, setBetCounter, doubleBet, halfBet, maxBet, balance } =
     useGameStore();
-
-  console.log(totalMultiplier);
-
   const moveCard = useGameStore((s) => s.moveCard);
+
+  const handleShuffle = () => {
+    if (isAnimating) {
+      return;
+    }
+
+    setIsAnimating(true);
+
+    setRevealedIndexes([]);
+
+    startGame();
+    setFlipTrigger((prev) => prev + 1);
+
+    const totalAnimationMs =
+      (baseCards.length - 1) * FLIP_STEP_MS + FLIP_DURATION_MS;
+
+    window.setTimeout(() => {
+      const matches = useGameStore.getState().resultIndex;
+
+      matches.forEach((index, i) => {
+        setTimeout(() => {
+          setRevealedIndexes((prev) => [...prev, index]);
+        }, i * REVEAL_STEP_MS);
+      });
+
+      const totalRevealTime = matches.length * REVEAL_STEP_MS;
+
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, totalRevealTime);
+    }, totalAnimationMs);
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     setSelectedId(Number(event.active.id));
@@ -40,10 +78,19 @@ const UpperCard = () => {
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="flex gap-4">
-        {baseCards.map((card) => (
-          <Card
-            key={card.id}
-            color={card.color}
+        {baseCards.map((card, index) => (
+          <FlipCard
+            key={`${flipTrigger}-${card.id}`}
+            flipTrigger={flipTrigger}
+            delayMs={index * FLIP_STEP_MS}
+            front={
+              <img
+                className="w-20 h-40 object-cover"
+                src={Image}
+                alt={""}
+              />
+            }
+            back={<Card color={card.color} />}
           />
         ))}
       </div>
@@ -65,7 +112,7 @@ const UpperCard = () => {
       </DndContext>
       <div className="flex gap-4">
         {riskCards.map((card, index) =>
-          resultIndex.includes(index) ? (
+          revealedIndexes.includes(index) ? (
             <div
               key={index}
               className="w-20 h-10 bg-amber-300"
@@ -83,7 +130,8 @@ const UpperCard = () => {
         )}
       </div>
       <button
-        onClick={startGame}
+        onClick={handleShuffle}
+        disabled={isAnimating}
         className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 active:scale-95 transition-all"
       >
         Shuffle
