@@ -11,6 +11,7 @@ import DraggableCard from "../Card/DraggableCard";
 import FlipCard from "./FlipCard";
 
 import Image from "../../assets/backface.png";
+import { useSounds } from "../../hooks/useSound";
 
 const FLIP_STEP_MS = 500;
 const FLIP_DURATION_MS = 650;
@@ -28,9 +29,12 @@ const UpperCard = () => {
   const riskCards = useGameStore((s) => s.riskCards);
   const selectedRiskIndex = useGameStore((s) => s.selectedRiskIndex);
   const setRiskLevel = useGameStore((s) => s.setRiskLevel);
+  const isPlayingSound = useGameStore((s) => s.isPlayingSound);
+  const toggleSound = useGameStore((s) => s.toggleSound);
   const { betCounder, setBetCounter, doubleBet, halfBet, maxBet, balance } =
     useGameStore();
   const moveCard = useGameStore((s) => s.moveCard);
+  const { playCoins } = useSounds();
 
   const handleShuffle = () => {
     if (isAnimating) {
@@ -53,6 +57,9 @@ const UpperCard = () => {
       matches.forEach((index, i) => {
         setTimeout(() => {
           setRevealedIndexes((prev) => [...prev, index]);
+          if (isPlayingSound) {
+            playCoins();
+          }
         }, i * REVEAL_STEP_MS);
       });
 
@@ -62,6 +69,10 @@ const UpperCard = () => {
         setIsAnimating(false);
       }, totalRevealTime);
     }, totalAnimationMs);
+  };
+
+  const handleSoundToggle = () => {
+    toggleSound();
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -79,6 +90,18 @@ const UpperCard = () => {
 
   return (
     <div className="flex flex-col items-center gap-4">
+      <div className="flex gap-4">
+        <button
+          onClick={handleSoundToggle}
+          className={`px-4 py-2 rounded font-medium transition-all active:scale-95 ${
+            isPlayingSound
+              ? "bg-amber-400 text-gray-900"
+              : "bg-gray-700 text-white hover:bg-gray-600"
+          }`}
+        >
+          {isPlayingSound ? "Sound: ON" : "Sound: OFF"}
+        </button>
+      </div>
       <div className="flex gap-4">
         {baseCards.map((card, index) => (
           <FlipCard

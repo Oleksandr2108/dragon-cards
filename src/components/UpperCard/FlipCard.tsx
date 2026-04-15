@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
+import { useSounds } from "../../hooks/useSound";
+import { useGameStore } from "../../store/useGameStore";
 interface FlipCardProps {
   front: React.ReactNode;
   back: React.ReactNode;
@@ -11,6 +12,8 @@ interface FlipCardProps {
 
 const FlipCard = ({ front, back, flipTrigger, delayMs = 0 }: FlipCardProps) => {
   const [flipped, setFlipped] = useState(false);
+  const { playFlip } = useSounds();
+  const isPlayingSound = useGameStore((s) => s.isPlayingSound);
   const containerStyle: React.CSSProperties = {
     width: "80px",
     height: "160px",
@@ -51,10 +54,13 @@ const FlipCard = ({ front, back, flipTrigger, delayMs = 0 }: FlipCardProps) => {
 
     const timeoutId = window.setTimeout(() => {
       setFlipped(true);
+      if (isPlayingSound) {
+        playFlip();
+      }
     }, delayMs);
 
     return () => window.clearTimeout(timeoutId);
-  }, [delayMs, flipTrigger]);
+  }, [delayMs, flipTrigger, isPlayingSound, playFlip]);
 
   return (
     <div style={containerStyle}>

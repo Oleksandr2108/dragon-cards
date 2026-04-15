@@ -36,12 +36,14 @@ interface GameStore {
   betCounder: number;
   balance: number;
   selectedRiskIndex: number;
+  isPlayingSound: boolean;
 
   setBetCounter: (count: number) => void;
   doubleBet: () => void;
   halfBet: () => void;
   maxBet: () => void;
   setRiskLevel: (index: number) => void;
+  toggleSound: () => void;
   initGame: () => void;
   shuffle: () => void;
   moveCard: (from: number, to: number) => void;
@@ -57,12 +59,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
   betCounder: 1,
   balance: 1000,
   selectedRiskIndex: 3,
+  isPlayingSound: true,
 
   setRiskLevel: (index: number) => {
     set({
       selectedRiskIndex: index,
       riskCards: [...initialRiskValues[index].result],
     });
+  },
+
+  toggleSound: () => {
+    set((state) => ({ isPlayingSound: !state.isPlayingSound }));
   },
 
   initGame: () => {
