@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Card from "../Card/Card";
-import { useGameStore } from "../../store/useGameStore";
+import { useGameStore, initialRiskValues } from "../../store/useGameStore";
 import {
   DndContext,
   closestCenter,
@@ -26,6 +26,8 @@ const UpperCard = () => {
   const lowCards = useGameStore((s) => s.lowCards);
   const startGame = useGameStore((s) => s.startGame);
   const riskCards = useGameStore((s) => s.riskCards);
+  const selectedRiskIndex = useGameStore((s) => s.selectedRiskIndex);
+  const setRiskLevel = useGameStore((s) => s.setRiskLevel);
   const { betCounder, setBetCounter, doubleBet, halfBet, maxBet, balance } =
     useGameStore();
   const moveCard = useGameStore((s) => s.moveCard);
@@ -129,10 +131,26 @@ const UpperCard = () => {
           ),
         )}
       </div>
+      <div className="flex gap-2">
+        {initialRiskValues.map((risk, index) => (
+          <button
+            key={risk.value}
+            onClick={() => setRiskLevel(index)}
+            disabled={isAnimating}
+            className={`px-4 py-2 rounded font-medium transition-all active:scale-95 ${
+              selectedRiskIndex === index
+                ? "bg-amber-400 text-gray-900"
+                : "bg-gray-700 text-white hover:bg-gray-600"
+            }`}
+          >
+            {risk.value}
+          </button>
+        ))}
+      </div>
       <button
         onClick={handleShuffle}
         disabled={isAnimating}
-        className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 active:scale-95 transition-all"
+        className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 active:scale-95 transition-all disabled:opacity-50"
       >
         Shuffle
       </button>

@@ -7,6 +7,11 @@ type Card = {
   color: string;
 };
 
+type RiskValue = {
+  value: string;
+  result: ResultType[];
+};
+
 const initialCards: Card[] = [
   { id: 1, color: "bg-red-500" },
   { id: 2, color: "bg-blue-500" },
@@ -16,8 +21,13 @@ const initialCards: Card[] = [
   { id: 6, color: "bg-pink-500" },
 ];
 
-const initialRiskCards: ResultType[] = ["LOST", "LOST", 3, "LOST", 5, "LOST"];
-
+// const initialRiskCards: ResultType[] = ["LOST", "LOST", 3, "LOST", 5, "LOST"];
+export const initialRiskValues: RiskValue[] = [
+  { value: "Low", result: ["LOST", 1, 2, 1, 2.5, 1.5] },
+  { value: "Medium", result: ["LOST", 3, 5, "LOST", 6, 1.5] },
+  { value: "High", result: ["LOST", "LOST", 25, "LOST", 50, "LOST"] },
+  { value: "Classic", result: ["LOST", 3.5, 4, "LOST", 10, 7] },
+];
 interface GameStore {
   baseCards: Card[];
   lowCards: Card[];
@@ -25,11 +35,13 @@ interface GameStore {
   resultIndex: number[];
   betCounder: number;
   balance: number;
+  selectedRiskIndex: number;
 
   setBetCounter: (count: number) => void;
   doubleBet: () => void;
   halfBet: () => void;
   maxBet: () => void;
+  setRiskLevel: (index: number) => void;
   initGame: () => void;
   shuffle: () => void;
   moveCard: (from: number, to: number) => void;
@@ -40,15 +52,24 @@ interface GameStore {
 export const useGameStore = create<GameStore>((set, get) => ({
   baseCards: [...initialCards],
   lowCards: [...initialCards],
-  riskCards: [...initialRiskCards],
+  riskCards: [...initialRiskValues[3].result],
   resultIndex: [],
   betCounder: 1,
   balance: 1000,
+  selectedRiskIndex: 3,
+
+  setRiskLevel: (index: number) => {
+    set({
+      selectedRiskIndex: index,
+      riskCards: [...initialRiskValues[index].result],
+    });
+  },
 
   initGame: () => {
+    const { selectedRiskIndex } = get();
     set({ baseCards: [...initialCards] });
     set({ lowCards: [...initialCards] });
-    set({ riskCards: [...initialRiskCards] });
+    set({ riskCards: [...initialRiskValues[selectedRiskIndex].result] });
     set({ resultIndex: [] });
   },
 
