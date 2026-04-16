@@ -1,4 +1,6 @@
-const Card = ({ color }: { color: string }) => {
-  return <div className={`w-20 h-40 ${color}`}></div>;
+const Card = ({ srcImg }: { srcImg: string }) => {
+  return <div className={`w-22.5 h-50`}>
+    <img className="w-full h-full object-cover rounded-[20px]" src={srcImg} alt="" />
+  </div>;
 };
 export default Card;

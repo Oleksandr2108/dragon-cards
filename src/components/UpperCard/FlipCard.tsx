@@ -16,8 +16,8 @@ const FlipCard = ({ front, back, flipTrigger, delayMs = 0 }: FlipCardProps) => {
   const isPlayingSound = useGameStore((s) => s.isPlayingSound);
   
   const containerStyle: React.CSSProperties = {
-    width: "80px",
-    height: "160px",
+    width: "90px",
+    height: "200px",
     perspective: "1000px",
     cursor: "pointer",
   };

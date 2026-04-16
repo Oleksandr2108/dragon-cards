@@ -15,10 +15,10 @@ const CustomButton = ({
     <button
       onClick={onClick}
       disabled={isAnimating}
-      className={`px-4 py-2 rounded font-medium transition-all active:scale-95 ${
+      className={` rounded font-rubik  transition-all active:scale-95  cursor-pointer ${
         role === "small"
-          ? "px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg"
-          : "px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 active:scale-95 transition-all disabled:opacity-50"
+          ? "w-10 h-8 bg-[#1b2030] hover:bg-[#222734] text-[#fff6] hover:text-white rounded-lg text-[12px] "
+          : "rounded-2 h-10 bg-[#025cc1] font-bold text-white text-[14px] active:scale-95 transition-all disabled:opacity-50"
       }`}
     >
       {text}

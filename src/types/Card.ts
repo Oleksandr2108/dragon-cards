@@ -1,7 +1,4 @@
-export type RiskLevel = "low" | "medium" | "high" | "classic";
-
-export type TopCard = {
+export type Card = {
   id: number;
-  value: string;
   img: string;
 };

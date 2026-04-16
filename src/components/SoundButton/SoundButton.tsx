@@ -1,4 +1,6 @@
 import { useGameStore } from "../../store/useGameStore";
+import SoundOn from "../../assets/sound-on.svg";
+import SoundOff from "../../assets/sound-off.svg";
 
 const SoundButton = () => {
   const toggleSound = useGameStore((s) => s.toggleSound);
@@ -8,18 +10,24 @@ const SoundButton = () => {
     toggleSound();
   };
   return (
-    <div className="flex gap-4">
       <button
         onClick={handleSoundToggle}
-        className={`px-4 py-2 rounded font-medium transition-all active:scale-95 ${
-          isPlayingSound
-            ? "bg-amber-400 text-gray-900"
-            : "bg-gray-700 text-white hover:bg-gray-600"
-        }`}
+        className={`w-10 h-10 rounded-lg bg-[#151a27] flex items-center justify-center cursor-pointer mb-5`}
       >
-        {isPlayingSound ? "Sound: ON" : "Sound: OFF"}
+        {isPlayingSound ? (
+          <img
+            className="w-6 h-6"
+            src={SoundOn}
+            alt="Sound On"
+          />
+        ) : (
+          <img
+            className="w-6 h-6"
+            src={SoundOff}
+            alt="Sound Off"
+          />
+        )}
       </button>
-    </div>
   );
 };
 

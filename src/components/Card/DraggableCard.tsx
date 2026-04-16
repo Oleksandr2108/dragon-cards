@@ -1,13 +1,14 @@
 import { useDraggable, useDroppable, useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import Card from "./Card";
+import type { Card as GameCard } from "../../types/Card";
 
 const DraggableCard = ({
   card,
   isSelected,
   onSelect,
 }: {
-  card: { id: number; color: string };
+  card: GameCard;
   isSelected: boolean;
   onSelect: (id: number) => void;
 }) => {
@@ -48,7 +49,7 @@ const DraggableCard = ({
       {...listeners}
       {...attributes}
     >
-      <Card color={card.color} />
+      <Card srcImg={card.img} />
     </div>
   );
 };

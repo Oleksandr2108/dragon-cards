@@ -1,12 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { Card } from "../types/Card";
 
 type ResultType = "LOST" | number;
-
-type Card = {
-  id: number;
-  color: string;
-};
 
 type RiskValue = {
   value: string;
@@ -14,13 +10,27 @@ type RiskValue = {
 };
 
 const initialCards: Card[] = [
-  { id: 1, color: "bg-red-500" },
-  { id: 2, color: "bg-blue-500" },
-  { id: 3, color: "bg-green-500" },
-  { id: 4, color: "bg-yellow-500" },
-  { id: 5, color: "bg-purple-500" },
-  { id: 6, color: "bg-pink-500" },
+  { id: 1, img: "/hero_1.png" },
+  { id: 2, img: "/hero_2.png" },
+  { id: 3, img: "/hero_3.png" },
+  { id: 4, img: "/hero_4.png" },
+  { id: 5, img: "/hero_5.png" },
+  { id: 6, img: "/hero_6.png" },
 ];
+
+const normalizeBetAmount = (amount: number, balance: number) => {
+  const maxAllowed = balance < 1000 ? balance : 1000;
+
+  if (maxAllowed <= 0) {
+    return 0;
+  }
+
+  if (!Number.isFinite(amount) || amount <= 1) {
+    return Math.min(1, maxAllowed);
+  }
+
+  return Math.min(Number(amount.toFixed(2)), maxAllowed);
+};
 
 export const initialRiskValues: RiskValue[] = [
   { value: "Low", result: ["LOST", 1, 2, 1, 2.5, 1.5] },
@@ -90,34 +100,25 @@ export const useGameStore = create<GameStore>()(
       },
 
       setBetCounter: (count: number) => {
-        set({ betCounder: count });
+        const balance = get().balance;
+        set({ betCounder: normalizeBetAmount(count, balance) });
       },
 
       doubleBet: () => {
         const currentCount = get().betCounder;
         const getBalance = get().balance;
-        if (currentCount * 2 > getBalance) {
-          set({ betCounder: getBalance });
-          return;
-        }
-        const newCount = Math.min(currentCount * 2, 1000);
-
-        set({ betCounder: newCount });
+        set({ betCounder: normalizeBetAmount(currentCount * 2, getBalance) });
       },
 
       halfBet: () => {
         const currentCount = get().betCounder;
-        const newCount = Math.max(Math.floor(currentCount / 2), 1);
-        set({ betCounder: newCount });
+        const balance = get().balance;
+        set({ betCounder: normalizeBetAmount(currentCount / 2, balance) });
       },
 
       maxBet: () => {
         const getBalance = get().balance;
-        if (getBalance < 1000) {
-          set({ betCounder: getBalance });
-          return;
-        }
-        set({ betCounder: 1000 });
+        set({ betCounder: normalizeBetAmount(getBalance, getBalance) });
       },
 
       shuffle: () => {

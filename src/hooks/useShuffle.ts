@@ -13,17 +13,19 @@ interface UseShuffleReturn {
   isAnimating: boolean;
   revealedIndexes: number[];
   handleShuffle: () => void;
+  popupResult: "LOST" | number | null;
 }
 
 export const useShuffle = (): UseShuffleReturn => {
   const baseCardsLength = useGameStore((s) => s.baseCards.length);
   const startGame = useGameStore((s) => s.startGame);
   const finalizeRound = useGameStore((s) => s.finalizeRound);
-  const { playCoins } = useSounds();
+  const { playCoins, playStart, lostResult, winResult } = useSounds();
 
   const [flipTrigger, setFlipTrigger] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [revealedIndexes, setRevealedIndexes] = useState<number[]>([]);
+  const [popupResult, setPopupResult] = useState<"LOST" | number | null>(null);
 
   const handleShuffle = () => {
     if (isAnimating) {
@@ -32,6 +34,11 @@ export const useShuffle = (): UseShuffleReturn => {
 
     setIsAnimating(true);
     setRevealedIndexes([]);
+
+    const { isPlayingSound } = useGameStore.getState();
+    if (isPlayingSound) {
+      playStart();
+    }
 
     startGame();
     setFlipTrigger((prev) => prev + 1);
@@ -55,8 +62,25 @@ export const useShuffle = (): UseShuffleReturn => {
       const totalRevealTime = matches.length * REVEAL_STEP_MS;
 
       setTimeout(() => {
+        const { pendingPayout, isPlayingSound } = useGameStore.getState();
+        const result: "LOST" | number =
+          pendingPayout > 0 ? pendingPayout : "LOST";
+
+        if (isPlayingSound) {
+          if (result === "LOST") {
+            lostResult();
+          } else {
+            winResult();
+          }
+        }
+
+        setPopupResult(result);
         finalizeRound();
         setIsAnimating(false);
+
+        setTimeout(() => {
+          setPopupResult(null);
+        }, 2000);
       }, totalRevealTime);
     }, totalAnimationMs);
   };
@@ -66,5 +90,6 @@ export const useShuffle = (): UseShuffleReturn => {
     isAnimating,
     revealedIndexes,
     handleShuffle,
+    popupResult,
   };
 };

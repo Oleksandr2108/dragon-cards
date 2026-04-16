@@ -1,15 +1,22 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=MedievalSharp&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
 
+@theme {
+  --font-risk: "MedievalSharp", sans-serif;
+  --font-rubik: "Rubik", sans-serif;
+}
 #root {
   width: 1126px;
   max-width: 100%;
   margin: 0 auto;
-
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  
+  background-color: #0a0e16;
 }
 
 p {

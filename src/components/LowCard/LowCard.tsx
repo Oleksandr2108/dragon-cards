@@ -20,7 +20,7 @@ const LowCard = () => {
             key={card.id}
             card={card}
             isSelected={selectedId === card.id}
-            onSelect={setSelectedId}
+            onSelect={(id) => setSelectedId(id)}
           />
         ))}
       </div>

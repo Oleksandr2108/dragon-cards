@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
 
-interface Card {
-  id: number;
-  color: string;
-}
+import type { Card } from "../types/Card";
 
 interface UseDragAndDropReturn {
   selectedId: number | null;
