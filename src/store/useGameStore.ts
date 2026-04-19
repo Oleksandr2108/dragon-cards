@@ -43,7 +43,7 @@ interface GameStore {
   lowCards: Card[];
   riskCards: ResultType[];
   resultIndex: number[];
-  betCounder: number;
+  betCounter: number;
   balance: number;
   selectedRiskIndex: number;
   isPlayingSound: boolean;
@@ -51,6 +51,7 @@ interface GameStore {
 
   setBetCounter: (count: number) => void;
   doubleBet: () => void;
+  setBalance: (amount: number) => void;
   halfBet: () => void;
   maxBet: () => void;
   setRiskLevel: (index: number) => void;
@@ -70,7 +71,7 @@ export const useGameStore = create<GameStore>()(
       lowCards: [...initialCards],
       riskCards: [...initialRiskValues[3].result],
       resultIndex: [],
-      betCounder: 1,
+      betCounter: 1,
       balance: 100000,
       selectedRiskIndex: 3,
       isPlayingSound: true,
@@ -101,28 +102,28 @@ export const useGameStore = create<GameStore>()(
 
       setBetCounter: (count: number) => {
         const balance = get().balance;
-        set({ betCounder: normalizeBetAmount(count, balance) });
+        set({ betCounter: normalizeBetAmount(count, balance) });
       },
 
       doubleBet: () => {
-        const currentCount = get().betCounder;
+        const currentCount = get().betCounter;
         const getBalance = get().balance;
-        set({ betCounder: normalizeBetAmount(currentCount * 2, getBalance) });
+        set({ betCounter: normalizeBetAmount(currentCount * 2, getBalance) });
       },
 
       halfBet: () => {
-        const currentCount = get().betCounder;
+        const currentCount = get().betCounter;
         const balance = get().balance;
-        set({ betCounder: normalizeBetAmount(currentCount / 2, balance) });
+        set({ betCounter: normalizeBetAmount(currentCount / 2, balance) });
       },
 
       maxBet: () => {
         const getBalance = get().balance;
-        set({ betCounder: normalizeBetAmount(getBalance, getBalance) });
+        set({ betCounter: normalizeBetAmount(getBalance, getBalance) });
       },
 
       shuffle: () => {
-        const shuffled = [...get().baseCards].sort(() => 0.5 - Math.random());
+        const shuffled = get().baseCards.toSorted(() => Math.random() - 0.5);
         const lowCards = get().lowCards;
 
         const matches: number[] = [];
@@ -145,21 +146,27 @@ export const useGameStore = create<GameStore>()(
         const { resultIndex, riskCards } = get();
         if (resultIndex.length === 0) return 0;
 
-        let totalMultiplier = 0;
+        let totalSum = 0;
         for (const index of resultIndex) {
           const value = riskCards[index];
           if (value === "LOST") {
             return "LOST";
-          } else {
-            totalMultiplier += value;
           }
+
+          totalSum += value;
         }
-        return totalMultiplier;
+        return totalSum;
       },
 
       startGame: () => {
-        const { betCounder, balance, shuffle } = get();
-        const newBalance = balance - betCounder;
+        const { betCounter, balance, shuffle } = get();
+        if (balance <= 0) {
+          set({ pendingPayout: 0 });
+          return;
+        }
+
+        const effectiveBet = Math.min(betCounter, balance);
+        const newBalance = balance - effectiveBet;
 
         shuffle();
         const result = get().reveal();
@@ -167,7 +174,7 @@ export const useGameStore = create<GameStore>()(
         if (result === "LOST") {
           set({ balance: newBalance, pendingPayout: 0 });
         } else {
-          set({ balance: newBalance, pendingPayout: betCounder * result });
+          set({ balance: newBalance, pendingPayout: effectiveBet * result });
         }
       },
 

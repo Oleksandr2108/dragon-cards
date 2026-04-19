@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useGameStore } from "../../store/useGameStore";
 import CustomButton from "../CustomButton/CustomButton";
 
 const BetInputBox = () => {
-  const { betCounder, setBetCounter, doubleBet, halfBet, maxBet } =
-    useGameStore();
-  const [inputValue, setInputValue] = useState(betCounder.toFixed(2));
+  const { betCounter, setBetCounter, doubleBet, halfBet, maxBet } =
+    useGameStore(
+      useShallow((s) => ({
+        betCounter: s.betCounter,
+        setBetCounter: s.setBetCounter,
+        doubleBet: s.doubleBet,
+        halfBet: s.halfBet,
+        maxBet: s.maxBet,
+      })),
+    );
+  const [inputValue, setInputValue] = useState(betCounter.toFixed(2));
 
   useEffect(() => {
-    setInputValue(betCounder.toFixed(2));
-  }, [betCounder]);
+    setInputValue(betCounter.toFixed(2));
+  }, [betCounter]);
 
   const commitBetValue = (value: string) => {
     const normalizedValue = value.replace(",", ".");
@@ -49,24 +58,23 @@ const BetInputBox = () => {
         "
       />
       <div className="flex gap-1">
+        <CustomButton
+          onClick={halfBet}
+          text=" 1/2"
+          role="small"
+        />
 
-      <CustomButton
-        onClick={halfBet}
-        text=" 1/2"
-        role="small"
-      />
+        <CustomButton
+          onClick={doubleBet}
+          text=" x2"
+          role="small"
+        />
 
-      <CustomButton
-        onClick={doubleBet}
-        text=" x2"
-        role="small"
-      />
-
-      <CustomButton
-        onClick={maxBet}
-        text=" Max"
-        role="small"
-      />
+        <CustomButton
+          onClick={maxBet}
+          text=" Max"
+          role="small"
+        />
       </div>
     </div>
   );

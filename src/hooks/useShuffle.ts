@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useGameStore } from "../store/useGameStore";
 import { useSounds } from "./useSound";
 
@@ -18,9 +19,13 @@ interface UseShuffleReturn {
 }
 
 export const useShuffle = (): UseShuffleReturn => {
-  const baseCardsLength = useGameStore((s) => s.baseCards.length);
-  const startGame = useGameStore((s) => s.startGame);
-  const finalizeRound = useGameStore((s) => s.finalizeRound);
+  const { baseCardsLength, startGame, finalizeRound } = useGameStore(
+    useShallow((s) => ({
+      baseCardsLength: s.baseCards.length,
+      startGame: s.startGame,
+      finalizeRound: s.finalizeRound,
+    })),
+  );
   const { playCoins, playStart, lostResult, winResult } = useSounds();
 
   const [flipTrigger, setFlipTrigger] = useState(0);
@@ -28,11 +33,35 @@ export const useShuffle = (): UseShuffleReturn => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [revealedIndexes, setRevealedIndexes] = useState<number[]>([]);
   const [popupResult, setPopupResult] = useState<"LOST" | number | null>(null);
+  const timeoutIdsRef = useRef<number[]>([]);
+
+  const clearAllTimeouts = useCallback(() => {
+    timeoutIdsRef.current.forEach((id) => {
+      window.clearTimeout(id);
+    });
+    timeoutIdsRef.current = [];
+  }, []);
+
+  const scheduleTimeout = useCallback(
+    (callback: () => void, delayMs: number) => {
+      const timeoutId = window.setTimeout(callback, delayMs);
+      timeoutIdsRef.current.push(timeoutId);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+    };
+  }, [clearAllTimeouts]);
 
   const handleShuffle = () => {
     if (isAnimating) {
       return;
     }
+
+    clearAllTimeouts();
 
     setIsAnimating(true);
     setRevealedIndexes([]);
@@ -51,7 +80,7 @@ export const useShuffle = (): UseShuffleReturn => {
       const matches = resultIndex;
 
       matches.forEach((index, i) => {
-        setTimeout(() => {
+        scheduleTimeout(() => {
           setRevealedIndexes((prev) => [...prev, index]);
           if (isPlayingSound) {
             playCoins();
@@ -61,7 +90,7 @@ export const useShuffle = (): UseShuffleReturn => {
 
       const totalRevealTime = matches.length * REVEAL_STEP_MS;
 
-      setTimeout(() => {
+      scheduleTimeout(() => {
         const { pendingPayout, isPlayingSound } = useGameStore.getState();
         const result: "LOST" | number =
           pendingPayout > 0 ? pendingPayout : "LOST";
@@ -78,7 +107,7 @@ export const useShuffle = (): UseShuffleReturn => {
         finalizeRound();
         setIsAnimating(false);
 
-        setTimeout(() => {
+        scheduleTimeout(() => {
           setPopupResult(null);
         }, 2000);
       }, totalRevealTime);
@@ -89,7 +118,7 @@ export const useShuffle = (): UseShuffleReturn => {
       setFlipTrigger((prev) => prev + 1);
       setIsUpperFaceUp(true);
 
-      window.setTimeout(() => {
+      scheduleTimeout(() => {
         runRevealFlow();
       }, openingFlipMs);
     };
@@ -98,7 +127,7 @@ export const useShuffle = (): UseShuffleReturn => {
       setFlipTrigger((prev) => prev + 1);
       setIsUpperFaceUp(false);
 
-      window.setTimeout(() => {
+      scheduleTimeout(() => {
         startRound();
       }, closingFlipMs);
 

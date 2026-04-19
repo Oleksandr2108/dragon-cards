@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useRef, useCallback } from "react";
 
 const SWAP_DURATION_MS = 350;
