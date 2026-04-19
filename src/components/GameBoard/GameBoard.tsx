@@ -7,23 +7,28 @@ import UpperCard from "../UpperCard/UpperCard";
 
 interface GameBoardProps {
   flipTrigger: number;
+  isUpperFaceUp: boolean;
   revealedIndexes: number[];
 }
 
-const GameBoard = ({ flipTrigger, revealedIndexes }: GameBoardProps) => {
+const GameBoard = ({
+  flipTrigger,
+  isUpperFaceUp,
+  revealedIndexes,
+}: GameBoardProps) => {
   return (
     <div className={styles.gameBoard}>
-        <SoundButton />
+      <SoundButton />
       <div className="flex flex-col items-center gap-10">
-
         <UpperCard
           flipTrigger={flipTrigger}
+          isUpperFaceUp={isUpperFaceUp}
           revealedIndexes={revealedIndexes}
         />
 
         <LowCard />
       </div>
-        <ResultRisk revealedIndexes={revealedIndexes} />
+      <ResultRisk revealedIndexes={revealedIndexes} />
     </div>
   );
 };

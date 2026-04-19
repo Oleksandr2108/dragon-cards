@@ -71,7 +71,7 @@ export const useGameStore = create<GameStore>()(
       riskCards: [...initialRiskValues[3].result],
       resultIndex: [],
       betCounder: 1,
-      balance: 1000,
+      balance: 100000,
       selectedRiskIndex: 3,
       isPlayingSound: true,
       pendingPayout: 0,

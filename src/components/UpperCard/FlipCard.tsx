@@ -9,10 +9,17 @@ interface FlipCardProps {
   front: React.ReactNode;
   back: React.ReactNode;
   flipTrigger: number;
+  isFaceUp: boolean;
   delayMs?: number;
 }
 
-const FlipCard = ({ front, back, flipTrigger, delayMs = 0 }: FlipCardProps) => {
+const FlipCard = ({
+  front,
+  back,
+  flipTrigger,
+  isFaceUp,
+  delayMs = 0,
+}: FlipCardProps) => {
   const [flipped, setFlipped] = useState(false);
   const { playFlip } = useSounds();
   const isPlayingSound = useGameStore((s) => s.isPlayingSound);
@@ -23,14 +30,14 @@ const FlipCard = ({ front, back, flipTrigger, delayMs = 0 }: FlipCardProps) => {
     }
 
     const timeoutId = window.setTimeout(() => {
-      setFlipped(true);
-      if (isPlayingSound) {
+      setFlipped(isFaceUp);
+      if (isFaceUp && isPlayingSound) {
         playFlip();
       }
     }, delayMs);
 
     return () => window.clearTimeout(timeoutId);
-  }, [delayMs, flipTrigger, isPlayingSound, playFlip]);
+  }, [delayMs, flipTrigger, isFaceUp, isPlayingSound, playFlip]);
 
   return (
     <div className={styles.container}>

@@ -5,18 +5,22 @@ import { useGameStore } from "../../store/useGameStore";
 
 interface UpperCardProps {
   flipTrigger: number;
+  isUpperFaceUp: boolean;
   revealedIndexes: number[];
 }
+
 const FLIP_STEP_MS = 500;
+
 const UpperCard = (props: UpperCardProps) => {
   const baseCards = useGameStore((s) => s.baseCards);
   return (
     <div className="flex gap-4">
       {baseCards.map((card, index) => (
         <FlipCard
-          key={`${props.flipTrigger}-${card.id}`}
+          key={card.id}
           flipTrigger={props.flipTrigger}
-          delayMs={index * FLIP_STEP_MS}
+          isFaceUp={props.isUpperFaceUp}
+          delayMs={props.isUpperFaceUp ? index * FLIP_STEP_MS : 0}
           front={
             <img
               className="w-full h-50 object-cover"

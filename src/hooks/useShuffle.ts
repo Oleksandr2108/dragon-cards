@@ -10,6 +10,7 @@ const REVEAL_STEP_MS = 300;
 
 interface UseShuffleReturn {
   flipTrigger: number;
+  isUpperFaceUp: boolean;
   isAnimating: boolean;
   revealedIndexes: number[];
   handleShuffle: () => void;
@@ -23,6 +24,7 @@ export const useShuffle = (): UseShuffleReturn => {
   const { playCoins, playStart, lostResult, winResult } = useSounds();
 
   const [flipTrigger, setFlipTrigger] = useState(0);
+  const [isUpperFaceUp, setIsUpperFaceUp] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [revealedIndexes, setRevealedIndexes] = useState<number[]>([]);
   const [popupResult, setPopupResult] = useState<"LOST" | number | null>(null);
@@ -40,13 +42,11 @@ export const useShuffle = (): UseShuffleReturn => {
       playStart();
     }
 
-    startGame();
-    setFlipTrigger((prev) => prev + 1);
-
-    const totalAnimationMs =
+    const openingFlipMs =
       (baseCardsLength - 1) * FLIP_STEP_MS + FLIP_DURATION_MS;
+    const closingFlipMs = FLIP_DURATION_MS;
 
-    window.setTimeout(() => {
+    const runRevealFlow = () => {
       const { resultIndex, isPlayingSound } = useGameStore.getState();
       const matches = resultIndex;
 
@@ -82,11 +82,35 @@ export const useShuffle = (): UseShuffleReturn => {
           setPopupResult(null);
         }, 2000);
       }, totalRevealTime);
-    }, totalAnimationMs);
+    };
+
+    const startRound = () => {
+      startGame();
+      setFlipTrigger((prev) => prev + 1);
+      setIsUpperFaceUp(true);
+
+      window.setTimeout(() => {
+        runRevealFlow();
+      }, openingFlipMs);
+    };
+
+    if (isUpperFaceUp) {
+      setFlipTrigger((prev) => prev + 1);
+      setIsUpperFaceUp(false);
+
+      window.setTimeout(() => {
+        startRound();
+      }, closingFlipMs);
+
+      return;
+    }
+
+    startRound();
   };
 
   return {
     flipTrigger,
+    isUpperFaceUp,
     isAnimating,
     revealedIndexes,
     handleShuffle,

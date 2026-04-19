@@ -7,6 +7,7 @@ import { useShuffle } from "./hooks/useShuffle";
 function App() {
   const {
     flipTrigger,
+    isUpperFaceUp,
     isAnimating,
     revealedIndexes,
     handleShuffle,
@@ -22,6 +23,7 @@ function App() {
       </div>
       <GameBoard
         flipTrigger={flipTrigger}
+        isUpperFaceUp={isUpperFaceUp}
         revealedIndexes={revealedIndexes}
       />
       <ResultPopup result={popupResult} />
